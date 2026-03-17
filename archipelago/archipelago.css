@@ -1,0 +1,180 @@
+@font-face {
+    font-family: GameFont;
+    src: url("/www/fonts/BestTen-CRT.ttf");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: TitleFont;
+    src: url("/www/fonts/VCR_OSD_MONO_1.001.ttf");
+    font-display: swap;
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+h1 {
+    font-family: TitleFont;
+    font-size: 80px;
+    font-weight: 300;
+    padding: 0; margin: 0;
+}
+
+#chatWindow, #notification {
+    text-align: left;
+    font-size: 20px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    overflow: hidden;
+}
+
+#notificationContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#notificationContainer * {
+    margin: 2px;
+}
+
+#chatWindow {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+#chatContainer {
+    background: rgb(21 21 21 / var(--text-chat-transparency));;
+    margin: 2px;
+    border-radius: 3px;
+    z-index: 100;
+    width: var(--text-chat-width);
+    max-height: 50%;
+    overflow: auto;
+}
+
+#chatContainer::-webkit-scrollbar {
+    width: 10px;
+}
+
+#chatInput {
+   background: rgb(21 21 21 / var(--text-chat-transparency));;
+    margin: 2px;
+    border: 0;
+    border-radius: 3px;
+    z-index: 100;
+    width: var(--text-chat-width);
+    height: 14px;
+    overflow: auto;
+    border: 0;
+    color: white;
+    font-family: 'GameFont';
+    padding: 0px 0px 4px 0px;
+    text-shadow:
+    1px 0 0 black,   /* right */
+    0 1px 0 black,   /* down */
+    -1px 0 0 black,  /* left */
+    0 -1px 0 black;  /* up */
+}
+
+.chatMessage {
+    font-family: TitleFont;
+    font-size: 21px;
+    margin: 3px;
+    color: white;
+    text-shadow:
+    1px 0 0 black,   /* right */
+    0 1px 0 black,   /* down */
+    -1px 0 0 black,  /* left */
+    0 -1px 0 black;  /* up */
+
+    animation-name: fadeOut;
+    animation-delay: 239s;
+    animation-duration: 0.7s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+}
+
+.chatMessage i {
+    color: lightgray;
+}
+
+.notificationText {
+    font-family: TitleFont;
+    z-index: 99;
+    color: white;
+    text-shadow:
+    1px 0 0 black,   /* right */
+    0 1px 0 black,   /* down */
+    -1px 0 0 black,  /* left */
+    0 -1px 0 black;  /* up */
+
+    padding: 10px;
+    min-width: 36px;
+    text-align: center;
+    font-size: 21px;
+}
+
+span.player {
+    color: #FAFAD2;
+}
+
+span.player[true] {
+    color: violet;
+}
+
+span.item {
+    color: lightgray;
+    /*text-decoration: underline;*/
+}
+
+span.item[trap] {
+    color: red;
+}
+
+span.item[normal] {
+    color: aqua;
+}
+
+span.item[useful] {
+    color: #6D8BE8;
+}
+
+span.item[progression] {
+    color: #AF99EF;
+}
+
+span.location {
+    color: lawngreen;
+    /*font-weight: bold;*/
+}
+
+.hide * {
+    display: none;
+}
+
+.textbox {
+    border: 12px solid transparent !important;
+    border-image: url(border.png) 12 repeat !important;
+    background-color: black !important;
+}
+
+.fadeOut {
+    animation-name: fadeOut;
+    animation-delay: 2s;
+    animation-duration: 0.7s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+}
