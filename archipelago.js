@@ -25,7 +25,7 @@ export const config = {
     name: "Archipelago",
     author: "Lanausse, SharkCheeses",
     description: "Archipelago Multiworld Randomizer",
-    version: "0.0.7",
+    version: "0.0.8",
 
     settings: {
         server: {
@@ -131,8 +131,16 @@ const deathMessages = [
     "({0} might also be stuck in a timeloop.)",
     "({0} realized you're timelooping.)",
     "(Cya, {0}!)",
-    "({0} stubbed their toe)"
+    "({0} stubbed their toe)",
+    "({0} saw a vision of the future.)"
 ]
+
+let skillIdToActorName = {};
+[10,11,12,13,14,15,16,17,18,20,155,156,157,160,182,183,184,185,186].forEach(function(id){ skillIdToActorName[id] = "Siffrin" });
+[32,33,34,35,36,37,38,36,40].forEach(function(id){ skillIdToActorName[id] = "Mirabelle" });
+[22,23,24,25,26,27,28,29].forEach(function(id){ skillIdToActorName[id] = "Isabeau" });
+[42,43,44,45,46,47,48,49,50].forEach(function(id){ skillIdToActorName[id] = "Odile" });
+[52,53,54,55,56,57,58,59].forEach(function(id){ skillIdToActorName[id] = "Bonnie" });
 
 // Forgot where I stole this from 
 function format(str, ...values) {
@@ -149,6 +157,8 @@ function doDeath(slot, time, cause) {
                 Game_Interpreter.prototype.changeHp(actor, -99999, true)
                 actor.performCollapse();
             });
+        } else if ( APMod.Utils.getAct() == 5 ) {
+            $gameTemp._commonEventId = 28;
         } else {
             $gameTemp._commonEventId = 321; // AgiReset
             $gameTemp._commonEventId = 107; // DeathSwitchesOFF
@@ -168,8 +178,8 @@ function doCommonEventHook(command) {
     let eventId = command.parameters[0]
     console.log(`Calling Event ${$dataCommonEvents[eventId].name} : ${eventId}`)
 
-    // Deathlink
-    if (eventId == 108 || eventId == 115 || eventId == 310) {
+    
+    if (eventId == 108 || eventId == 115 || eventId == 310 || eventId == 109) { // Deathlink
         if (!deathLinkDeath) {
             let playerName = APMod.client.players.self.name;
             let loopCount = APMod.Utils.getLoops();
@@ -341,20 +351,84 @@ function doCommonEventHook(command) {
             deathLinkDeath = false;
         }
         
+    } else if (eventId == 54) { // (!!!TEXT VARIABLES) Gets called on New Game and Save Load.
+        APMod.Items.resetInventory();
+    } else if (eventId == 103) { // (LOOP_items) Resets your inventory. Lets do this instead.
+        APMod.Items.resetInventory();
+        command.code = 0;
+    } else if (eventId == 105) { // (LOOP_PartyLvlsnSkills) Resets your party's Level 7 Skills. Lets only reset their level.
+        let keySelector =  $gameVariables._data[131];
+        let isabeau_EXP = 104287;
+        let mirabelle_EXP = 112486;
+        let odile_EXP = 104287;
+
+        // Reimplementing LOOP_PartyLvlsnSkills in js.
+        switch ($gameVariables._data[134]) { // LoopResetSwitches
+            case 1: // Dormont
+                isabeau_EXP = 104287;
+                mirabelle_EXP = 112486;
+                odile_EXP = 104287;
+                break;
+
+            case 2: // Floor 1
+                if (keySelector <= 1) {
+                    isabeau_EXP = $gameVariables._data[184];
+                    mirabelle_EXP = $gameVariables._data[185];
+                    odile_EXP = $gameVariables._data[186];
+                } else {
+                    isabeau_EXP = $gameVariables._data[194];
+                    mirabelle_EXP = $gameVariables._data[195];
+                    odile_EXP = $gameVariables._data[196];
+                }
+                break;
+
+            case 3: // Floor 2
+                if (keySelector <= 1) {
+                    isabeau_EXP = $gameVariables._data[203];
+                    mirabelle_EXP = $gameVariables._data[204];
+                    odile_EXP = $gameVariables._data[205];
+                } else {
+                    isabeau_EXP = $gameVariables._data[213];
+                    mirabelle_EXP = $gameVariables._data[214];
+                    odile_EXP = $gameVariables._data[215];
+                }
+                break;
+
+            case 4: // Floor 3
+                if (keySelector <= 1) {
+                    isabeau_EXP = $gameVariables._data[223];
+                    mirabelle_EXP = $gameVariables._data[224];
+                    odile_EXP = $gameVariables._data[225];
+                } else {
+                    isabeau_EXP = $gameVariables._data[233];
+                    mirabelle_EXP = $gameVariables._data[234];
+                    odile_EXP = $gameVariables._data[235];
+                }
+                break;
+
+            case 5: // King
+                isabeau_EXP = $gameVariables._data[243];
+                mirabelle_EXP = $gameVariables._data[244];
+                odile_EXP = $gameVariables._data[245];
+                break;
+        
+            default:
+                break;
+        }
+
+        $gameActors.actor(2).changeExp(isabeau_EXP, false);
+        $gameActors.actor(3).changeExp(mirabelle_EXP, false);
+        $gameActors.actor(4).changeExp(odile_EXP, false);
+
+        command.code = 0;
+    } else if (eventId == 170) { // (Repair) Empty event that gets called on a save load.
+
     }
 
     return command
 }
 
-function doSlotData(slot_data) {
-    if (slot_data.death_link) APMod.client.deathLink.enableDeathLink();
-    if (slot_data.starting_craft) console.log("starting_craft stub.");
-    if (slot_data.music_rando) console.log("music_rando stub.");
-    if (slot_data.enemy_rando) console.log("enemy_rando stub.");
-    if (slot_data.troop_rando) console.log("troop_rando stub.");
-}
-
-function doHookGameInterpreter () {
+function doGameInterpreterHook () {
     // Hook executeCommand
         // 101: Text                | face, position, ?, ?
         // 108: Comment             | Comment
@@ -475,6 +549,14 @@ function doFunctionPatches() {
             this._commandGuard();
         } catch (e) { console.log("commandGuard errored out. Ignore."); console.error(e); }
     };
+}
+
+function doSlotData(slot_data) {
+    if (slot_data.death_link) APMod.client.deathLink.enableDeathLink();
+    if (slot_data.starting_craft) console.log("starting_craft stub.");
+    if (slot_data.music_rando) console.log("music_rando stub.");
+    if (slot_data.enemy_rando) console.log("enemy_rando stub.");
+    if (slot_data.troop_rando) console.log("troop_rando stub.");
 }
 
 function randomPalette(seed) {
@@ -767,46 +849,92 @@ APMod.Chat.setupMessageEvents = function() {
 // Items
 APMod.Items = {};
 APMod.Items.received = [];
-APMod.Items.add = function(items) {
+APMod.Items.add = function(item) {
+    // This is kind of messy
+    if (item.item < APMod.BaseId.Item) { // Skill
+        let id = item.item - APMod.BaseId.Skill
+        console.log(`Received Skill ${$dataSkills[id].name}`);
+
+        // Check what Actor this skill belongs to and give it to them.
+        let actorName = skillIdToActorName[id];
+
+        // Temporary Try-Catch.
+        // TODO: Add a check to see if the player is in-game
+        try {
+            $gameActors._data.forEach(function(actor) {
+                if (actor)
+                    if (actor._name == actorName)
+                        actor._skills.push(id);
+                        // actor.learnSkill();
+            });
+
+        } catch (error) {console.error(error)}
+            
+
+    } else if (item.item < APMod.BaseId.Weapon) { // Item
+        let id = item.item - APMod.BaseId.Item
+        console.log(`Received Item ${$dataItems[id].name}`);
+        $gameParty.gainItem($dataItems[id], 1);
+
+    } else if (item.item < APMod.BaseId.Armor) { // Weapon
+        let id = item.item - APMod.BaseId.Weapon
+        console.log(`Received Weapon ${$dataWeapons[id].name}`);
+        $gameParty.gainItem($dataWeapons[id], 1);
+
+    } else if (item.item < APMod.BaseId.Misc) { // Armor
+        let id = item.item - APMod.BaseId.Armor
+        console.log(`Received Armor ${$dataArmors[id].name}`);
+        $gameParty.gainItem($dataArmors[id], 1);
+
+    } 
 };
 
 APMod.Items.onReceive = function(packet) {
     console.log(packet);
 
     packet.items.forEach(function(item) {
-        // A little messy
-        if (item.item < APMod.BaseId.Item) { // Skill
-            let id = item.item - APMod.BaseId.Skill
-            console.log(`Received Skill ${$dataSkills[id].name}`);
-            // Get Actor from current party and give them their skill.
-
-            //$gameParty.gainItem($dataSkills[id], 1);
-
-        } else if (item.item < APMod.BaseId.Weapon) { // Item
-            let id = item.item - APMod.BaseId.Item
-            console.log(`Received Item ${$dataItems[id].name}`);
-            $gameParty.gainItem($dataItems[id], 1);
-
-        } else if (item.item < APMod.BaseId.Armor) { // Weapon
-            let id = item.item - APMod.BaseId.Weapon
-            console.log(`Received Weapon ${$dataWeapons[id].name}`);
-            $gameParty.gainItem($dataWeapons[id], 1);
-
-        } else if (item.item < APMod.BaseId.Misc) { // Armor
-            let id = item.item - APMod.BaseId.Armor
-            console.log(`Received Armor ${$dataArmors[id].name}`);
-            $gameParty.gainItem($dataArmors[id], 1);
-
-        } 
+        APMod.Items.received.push(item);
+        APMod.Items.add(item);
     });
 }
 
+APMod.Items.clearInventory = function() {
+    $gameParty._items = {};
+    $gameParty._weapons = {};
+    $gameParty._armors = {};
+
+    $gameActors._data.forEach(function(actor) {
+        if (actor) {
+
+            actor._equips.forEach(function(equip) {
+                equip._dataClass = "";
+                equip._itemId = "";
+            });
+
+            actor._skills = [];
+        }
+
+    });
+    
+    // Please don't kill Tutorial Kid. She didn't do anything to you.
+    $gameActors._data[7]._skills = [1, 107, 108, 109];
+
+}
+
+APMod.Items.resetInventory = function() {
+    this.clearInventory();
+    this.received.forEach(function(item) {
+        APMod.Items.add(item);
+    });
+}
 
 // Base
 
 APMod.connect = async () => {
     if (APMod.client) {
         APMod.client.socket.disconnect();
+        APMod.Items.received = [];
+        APMod.Items.clearInventory();
         
     } else { // First Time Init
         APMod.client = new window.Archipelago.Client();
@@ -832,7 +960,7 @@ APMod.connect = async () => {
 
         APMod.client.deathLink.on("deathReceived", doDeath);
 
-        doHookGameInterpreter();
+        doGameInterpreterHook();
 
         APMod.Chat.setupMessageEvents();
         APMod.Chat.setupWindow();
@@ -841,7 +969,6 @@ APMod.connect = async () => {
         // Hook loadTitle1
         // TODO: Make a better texturepack manager
         ImageManager.loadTitle1 = function(filename, hue) {
-            // console.log(filename)
             if (filename == "logo") return this.loadBitmap('mod/mods/archipelago/img/titles1/', filename, hue, true);
             return this.loadBitmap('img/titles1/', filename, hue, true);
         };
