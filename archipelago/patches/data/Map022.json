@@ -1,0 +1,1 @@
+[{"op":"replace","path":"/events/34/pages/0/list/13/parameters/1","value":"(Say: \"Change\".)<<v[96] === 0>>"},{"op":"replace","path":"/events/34/pages/0/list/12/parameters/0/0","value":"(Say: \"Change\".)<<v[96] === 0>>"}]
