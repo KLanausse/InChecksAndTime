@@ -1,11 +1,8 @@
 /*
  * TODO:
- *  Hook MORE functions
  *  Better Connection UI?
- *  Have the audio randomizer be based on the current APWorld seed
- *  Have the "pallet" randomizer be based on the world seed
+ *  Have the "palette" randomizer be based on the world seed
  *  Rebindable chat button.
- *
  */
 window.APMod = {}
 APMod.server = "localhost:38281";
@@ -13,6 +10,7 @@ APMod.slot = "Siffrin";
 APMod.password = "";
 const game = "In Stars And Time";
 let deathLinkDeath = false;
+let deathCount = 0;
 
 APMod.BaseId = {};
 APMod.BaseId.Skill = 1677310
@@ -100,23 +98,6 @@ export const config = {
     //forceDisable: () => platform() !== "linux"
 }
 
-const enemyRandomIds = [
-    1, 2, 3, 4, 5, 6, 7, 8,
-    11, 12, 13, 14, 15, 16,
-    17, 18, 19, // NOSTALGIE
-    20, // Tutorial Kid
-    21, 22, 23, 24, // Mini-Boss
-    26, 27, 28, 29, 30, 31, 34, 35, // Bosses
-    37, 38, 39, // Tutorial
-    40, // Test baby
-    42, 43, 44, 46, 47,
-    50, 51, 52,
-    54, 55, 56, 57, 58, 59, 60, 61,
-    63, 64
-
-
-];
-
 const deathMessages = [
     "({0} died.)",
     "({0} failed you.)",
@@ -182,12 +163,16 @@ function doCommonEventHook(command) {
     switch (eventId) {
         case 108:
         case 109:
-        case 310:
+            if (!APMod.slot_data.unavoidable_deaths) break;
+        case 310: // Act 5 Loopback
         case 115: // Deathlink
 
             if (deathLinkDeath) {
                 deathLinkDeath = false;
                 break;
+            } else {
+                deathCount+1
+                if ((deathCount)%APMod.slot_data.death_link_amnesty != 0) break;
             }
 
             
@@ -584,6 +569,17 @@ function doDataManagerHook() {
 function doFunctionHooks() {
     doGameInterpreterHook();
     doDataManagerHook();
+    doMusicRando();
+
+    // Enemy Rando
+    Game_Enemy.prototype._setup = Game_Enemy.prototype.setup;
+    Game_Enemy.prototype.setup =
+    function(enemyId, x, y) {
+        var randEnemyId = APMod.slot_data.enemy_rando[enemyId];
+        console.debug(`Changing enemy ${enemyId} to ${randEnemyId}`)
+        this._setup(randEnemyId, x, y);
+
+    };
 
     OrangeGreenworks.activateAchievement = function(achievementName) {
         let achievementNameToId = {
@@ -645,10 +641,23 @@ function doJSONPatch(name, data, path) {
     }
 }
 
+function doMusicRando() {
+    // Hook playBgm
+    window.AudioManager._playBgm = window.AudioManager.playBgm;
+    window.AudioManager.playBgm = function(bgm, pos) {
+
+        if (!bgm.shuffled) {
+            bgm.name = APMod.slot_data.music_rando[bgm.name];
+            bgm.shuffled = true;
+        };
+        window.AudioManager._playBgm(bgm, pos);
+
+    };
+}
+
 function doSlotData(slot_data) {
     if (slot_data.death_link) APMod.client.deathLink.enableDeathLink();
     if (slot_data.starting_craft) console.warn("starting_craft stub.");
-    if (slot_data.music_rando) console.warn("music_rando stub.");
     if (slot_data.enemy_rando) console.warn("enemy_rando stub.");
     if (slot_data.troop_rando) console.warn("troop_rando stub.");
 }
@@ -1123,21 +1132,4 @@ export const onRegister = async (mod) => {
 export const onLoad = async () => {
     // Patch some stuff
     doFunctionPatches();
-
-    // Enemy Rando
-    Game_Enemy.prototype.setup =
-    function(enemyId, x, y) {
-        if (enemyId != 29) {
-            var randEnemyId = enemyRandomIds[parseInt(Math.random()*enemyRandomIds.length)];
-            console.debug(`Changing enemy ${enemyId} to ${randEnemyId}`)
-            this._enemyId = randEnemyId;
-        } else {
-            this._enemyId = enemyId;
-        }
-
-
-        this._screenX = x;
-        this._screenY = y;
-        this.recoverAll();
-    };
 }

@@ -12,8 +12,8 @@ The In Stars And Time Archipelago Mod.
 
 ## Todo
 - [ ] - Proper Connection UI
-- [ ] - Have the BGM & SFX randomizer be based on the current APWorld seed
-- [ ] - Have the "pallet" randomizer be based on the world seed
+- [x] - Have the BGM & SFX randomizer be based on the current APWorld seed
+- [ ] - Have the "palette" randomizer be based on the world seed
 - [ ] - Rebindable chat button.
 - [ ] - Cleanup code.
 - [ ] - Make A Better TODO list
