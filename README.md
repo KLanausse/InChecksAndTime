@@ -8,6 +8,7 @@ The In Stars And Time Archipelago Mod.
 1. Install the [Starshift](https://github.com/jakeayy/Starshift/blob/main/README.md#installing) Mod Loader.
 2. [Download](https://github.com/KLanausse/InChecksAndTime/archive/refs/heads/main.zip) the lastest release.
 3. Extract `archipelago.js` AND the archipelago folder from the zip to `\path\to\In Stars And Time\www\mod`
+3. Create a folder called "apsave" under `\path\to\In Stars And Time\www`
 #### You should now be all set!
 
 ## Todo
