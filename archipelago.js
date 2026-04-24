@@ -47,8 +47,8 @@ export const config = {
             title: "Password",
             helpMessage: "Set the AP server password.",
             type: "button",
-            onOk: async () => {
-                APMod.password = await prompt("Password", APMod.password);
+            onOk: () => {
+                APMod.password = prompt("Password", APMod.password);
             }
         },
         connect: {
@@ -161,11 +161,11 @@ function doCommonEventHook(command) {
     console.debug(`Calling Event ${$dataCommonEvents[eventId].name} : ${eventId}`)
 
     switch (eventId) {
-        case 108:
-        case 109:
+        case 115: // GAMEOVER_First
+        case 109: // GAMEOVER_Special
             if (!APMod.slot_data.unavoidable_deaths) break;
-        case 310: // Act 5 Loopback
-        case 115: // Deathlink
+        case 310: // ReviveAct5
+        case 108: // Deathlink
 
             if (deathLinkDeath) {
                 deathLinkDeath = false;
@@ -348,6 +348,10 @@ function doCommonEventHook(command) {
             command.code = 0;
         case 170: // (Repair) Empty event that gets called on a save load.
             APMod.Items.resetInventory();
+            $gameSwitches._data[156] = true;
+            $gameSwitches._data[20] = true;
+            $gameSwitches._data[42] = APMod.slot_data.skip_intro == 0;
+
             break;
 
         case 105: // (LOOP_PartyLvlsnSkills) Resets your party's Level 7 Skills. Lets only reset their level.
@@ -420,6 +424,9 @@ function doCommonEventHook(command) {
         case 133: // (LockedDoor)
             APMod.client.check(APMod.BaseId.Misc + 17);
             break;
+
+        case 26: //*FastForwardDisable
+            command.code = 0;
             
         default:
             break;
@@ -432,7 +439,7 @@ function doGameInterpreterHook () {
         // 101: Text                | face, position, ?, ?
         // 108: Comment             | Comment
         // 117: Comment Event       | id
-        // 121: Control Switches    | id, Operation?, value?
+        // 121: Control Switches    | id_start, id_end, value
         // 122: Control Variables   | id, id?, Operation?, Operand, value
         // 126: Change Items        | id, operation, variable?, amount
         // 127: Change Weapons      | id, operation, operand, value, include equipment(bool)
@@ -454,8 +461,37 @@ function doGameInterpreterHook () {
                         command = doCommonEventHook(command);
                         break;
 
+                    case 121:
+                        id = command.parameters[0];
+                        operation = command.parameters[2];
+                        if (id == 52 && operation == 0) command.code = 0; // GotFlower_TL
+                        if (id == 296 && operation == 1) APMod.client.check(APMod.BaseId.Misc + 66); // Gave Flower To The King
+                        break;
+
                     case 122:
-                        // console.log(command);
+                        id = command.parameters[0];
+                        operation = command.parameters[2];
+                        if (id == 57 && operation == 0) { //
+                            // Would love to do APMod.client.check(APMod.BaseId.Misc + command.parameters[5] + offset); instead.
+                            switch (command.parameters[5]) {
+                                case 1:
+                                    APMod.client.check(APMod.BaseId.Misc + 8);
+                                    break;
+                                case 2:
+                                    APMod.client.check(APMod.BaseId.Misc + 5);
+                                    break;
+                                case 3:
+                                case 4:
+                                    APMod.client.check(APMod.BaseId.Misc + 6);
+                                    break;
+                                case 6:
+                                    APMod.client.check(APMod.BaseId.Misc + 7);
+                                    break;
+                                default:
+                                    console.warn(`Sending Flower Gift Check Failed?? ${command.parameters[5]}`)
+                                    break;
+                            }
+                        }
                         break;
 
                     case 126: // Items
@@ -507,6 +543,10 @@ function doGameInterpreterHook () {
                         }
 
                         command.code = 0;
+                        break;
+
+                    case 101:
+                        console.log(command);
                         break;
                 
                     default:
@@ -598,6 +638,25 @@ function doFunctionHooks() {
 
         APMod.client.check(APMod.BaseId.Misc + achievementNameToId[achievementName]);
     }
+
+    // Hook loadTitle1
+    // TODO: Make a better texturepack manager
+    ImageManager.loadTitle1 = function(filename, hue) {
+        if (filename == "logo") return this.loadBitmap('mod/mods/archipelago/img/titles1/', filename, hue, true);
+        return this.loadBitmap('img/titles1/', filename, hue, true);
+    };
+
+    // Replace text with formatted version if needed.
+    Game_Message.prototype.add = function(text) {
+        let formattedText = text.replace(/{([a-zA-Z]*)(\d+)}/, async function(match, type, id) { // "(You {Skill1}!)"
+            let newText = await APMod.Utils.createFoundItemText(APMod.BaseId[type], id);
+            return
+        });
+        master2015hp.isatSnp.b_47.call(this, text);
+        if (SceneManager._scene._messageWindow)
+            SceneManager._scene._messageWindow._choiceWindow.initChoicesRec();//reset
+    };
+
 }
 
 function doFunctionPatches() {
@@ -730,6 +789,24 @@ APMod.Utils.formatUsingNodes = function(text, nodes) {
     });
 
     return fomattedText;
+}
+
+APMod.Utils.createFoundItemText = async function(type, id) {
+    let items = await APMod.client.scout([APMod.BaseId[type]+id]);
+    let itemName = items[0].name
+    let receiver = items[0].receiver.alias;
+    let inbetween = "found ";
+
+
+    APMod.temp = items[0];
+    if (this.isSelf(items[0].receiver)) {
+        receiver = null;
+        // if (type == "Item" && items[0])
+    }
+
+
+
+    return `(You ${inbetween}${receiver} ${items[0].name}!)`;
 }
 
 // Notifications
@@ -950,6 +1027,7 @@ APMod.Chat.setupMessageEvents = function() {
 }
 
 // Items
+// TODO: Remove Items.received and use APMod.client.items.received instead.
 APMod.Items = {};
 APMod.Items.received = [];
 APMod.Items.add = function(item) {
@@ -978,6 +1056,8 @@ APMod.Items.add = function(item) {
         let id = item.item - APMod.BaseId.Item
         console.log(`Received Item ${$dataItems[id].name}`);
         $gameParty.gainItem($dataItems[id], 1);
+
+        if (id == 43) $gameSwitches._data[52] = true;
 
     } else if (item.item < APMod.BaseId.Armor) { // Weapon
         let id = item.item - APMod.BaseId.Weapon
@@ -1088,19 +1168,12 @@ APMod.connect = async () => {
 
         APMod.client.deathLink.on("deathReceived", doDeath);
 
+        doFunctionPatches();
         doFunctionHooks();
 
         APMod.Chat.setupMessageEvents();
         APMod.Chat.setupWindow();
         APMod.Notification.setup();
-
-        // Hook loadTitle1
-        // TODO: Make a better texturepack manager
-        ImageManager.loadTitle1 = function(filename, hue) {
-            if (filename == "logo") return this.loadBitmap('mod/mods/archipelago/img/titles1/', filename, hue, true);
-            return this.loadBitmap('img/titles1/', filename, hue, true);
-        };
-
     }
 
     APMod.client.login(window.APMod.server, window.APMod.slot, game, {password: window.APMod.password})
@@ -1118,18 +1191,31 @@ APMod.connect = async () => {
 
 // Mod Loader
 export const onRegister = async (mod) => {
-    APMod.settings = mod.store.settings;
-    window.Archipelago = await import("https://unpkg.com/archipelago.js/dist/archipelago.min.js");
+    // Import Librays
+    // I'm gonna get yelled at for this.
+    let polyfill = document.createElement("script");
+    polyfill.type = "module";
+    polyfill.src = "https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?version=4.8.0&features=structuredClone%2CArray.prototype.toSorted";
+    document.body.append(polyfill);
+
+    let iteratorPolyfill = document.createElement("script");
+    iteratorPolyfill.type = "module";
+    iteratorPolyfill.src = "https://unpkg.com/iterator-polyfill@1.0.9/dist/index.js";
+    document.body.append(iteratorPolyfill);
+
+    window.Archipelago = await import("https://unpkg.com/archipelago.js@2.1.0/dist/archipelago.min.js");
     window.JSONPatch = await import("https://cdn.jsdelivr.net/npm/immutable-json-patch/+esm");
+
 
     // Add Stylesheet
     let chatWindowStyle = document.createElement("link");
     chatWindowStyle.rel = "stylesheet";
     chatWindowStyle.href = "mod/mods/archipelago/archipelago.css";
     document.getElementsByTagName("head")[0].appendChild(chatWindowStyle);
+
+    // Mod Settings
+    APMod.settings = mod.store.settings;
 }
 
 export const onLoad = async () => {
-    // Patch some stuff
-    doFunctionPatches();
 }
