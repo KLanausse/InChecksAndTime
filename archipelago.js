@@ -24,7 +24,6 @@ export const config = {
   author: "Lanausse, SharkCheeses",
   description: "Archipelago Multiworld Randomizer",
   version: "0.0.9",
-
   settings: {
     server: {
       title: "Server",
@@ -32,6 +31,7 @@ export const config = {
       type: "button",
       onOk: async () => {
         APMod.server = await prompt("AP Server", APMod.server);
+        await sleep(100);
         console.debug(APMod.server);
       },
     },
@@ -41,14 +41,16 @@ export const config = {
       type: "button",
       onOk: async () => {
         APMod.slot = await prompt("Name", APMod.slot);
+        await sleep(100);
       },
     },
     password: {
       title: "Password",
       helpMessage: "Set the AP server password.",
       type: "button",
-      onOk: () => {
-        APMod.password = prompt("Password", APMod.password);
+      onOk: async () => {
+        APMod.password = await prompt("Password", APMod.password);
+        await sleep(100);
       },
     },
     connect: {
