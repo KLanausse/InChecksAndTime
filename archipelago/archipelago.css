@@ -23,10 +23,12 @@ h1 {
     font-family: TitleFont;
     font-size: 80px;
     font-weight: 300;
-    padding: 0; margin: 0;
+    padding: 0;
+    margin: 0;
 }
 
-#chatWindow, #notification {
+#chatWindow,
+#notification {
     text-align: left;
     font-size: 20px;
     position: absolute;
@@ -40,7 +42,7 @@ h1 {
 #notificationContainer {
     display: flex;
     justify-content: center;
-    align-items: center; 
+    align-items: center;
     flex-direction: column;
     overflow: hidden;
 }
@@ -56,7 +58,7 @@ h1 {
 }
 
 #chatContainer {
-    background: rgb(21 21 21 / var(--text-chat-transparency));;
+    background: rgb(21 21 21 / var(--text-chat-transparency));
     margin: 2px;
     border-radius: 3px;
     z-index: 100;
@@ -70,7 +72,7 @@ h1 {
 }
 
 #chatInput {
-   background: rgb(21 21 21 / var(--text-chat-transparency));;
+    background: rgb(21 21 21 / var(--text-chat-transparency));
     margin: 2px;
     border: 0;
     border-radius: 3px;
@@ -80,13 +82,14 @@ h1 {
     overflow: auto;
     border: 0;
     color: white;
-    font-family: 'GameFont';
+    font-family: "GameFont";
     padding: 0px 0px 4px 0px;
     text-shadow:
-    1px 0 0 black,   /* right */
-    0 1px 0 black,   /* down */
-    -1px 0 0 black,  /* left */
-    0 -1px 0 black;  /* up */
+        1px 0 0 black,
+        /* right */ 0 1px 0 black,
+        /* down */ -1px 0 0 black,
+        /* left */ 0 -1px 0 black; /* up */
+    padding-left: 0.25em;
 }
 
 .chatMessage {
@@ -95,10 +98,10 @@ h1 {
     margin: 3px;
     color: white;
     text-shadow:
-    1px 0 0 black,   /* right */
-    0 1px 0 black,   /* down */
-    -1px 0 0 black,  /* left */
-    0 -1px 0 black;  /* up */
+        1px 0 0 black,
+        /* right */ 0 1px 0 black,
+        /* down */ -1px 0 0 black,
+        /* left */ 0 -1px 0 black; /* up */
 
     animation-name: fadeOut;
     animation-delay: 239s;
@@ -116,10 +119,10 @@ h1 {
     z-index: 99;
     color: white;
     text-shadow:
-    1px 0 0 black,   /* right */
-    0 1px 0 black,   /* down */
-    -1px 0 0 black,  /* left */
-    0 -1px 0 black;  /* up */
+        1px 0 0 black,
+        /* right */ 0 1px 0 black,
+        /* down */ -1px 0 0 black,
+        /* left */ 0 -1px 0 black; /* up */
 
     padding: 10px;
     min-width: 36px;
@@ -128,7 +131,7 @@ h1 {
 }
 
 span.player {
-    color: #FAFAD2;
+    color: #fafad2;
 }
 
 span.player[true] {
@@ -149,11 +152,11 @@ span.item[normal] {
 }
 
 span.item[useful] {
-    color: #6D8BE8;
+    color: #6d8be8;
 }
 
 span.item[progression] {
-    color: #AF99EF;
+    color: #af99ef;
 }
 
 span.location {

@@ -31,7 +31,7 @@ export const config = {
       type: "button",
       onOk: async () => {
         APMod.server = await prompt("AP Server", APMod.server);
-        await sleep(100);
+        await sleep(1000);
         console.debug(APMod.server);
       },
     },
@@ -41,7 +41,7 @@ export const config = {
       type: "button",
       onOk: async () => {
         APMod.slot = await prompt("Name", APMod.slot);
-        await sleep(100);
+        await sleep(1000);
       },
     },
     password: {
@@ -50,7 +50,7 @@ export const config = {
       type: "button",
       onOk: async () => {
         APMod.password = await prompt("Password", APMod.password);
-        await sleep(100);
+        await sleep(1000);
       },
     },
     connect: {
@@ -548,7 +548,7 @@ function doGameInterpreterHook() {
           if (id == 57 && operation == 0) {
             //
             // Would love to do APMod.client.check(APMod.BaseId.Misc + command.parameters[5] + offset); instead.
-            switch (command.parameters[5]) {
+            switch (command.parameters[4]) {
               case 1:
                 APMod.client.check(APMod.BaseId.Misc + 8);
                 break;
@@ -576,14 +576,15 @@ function doGameInterpreterHook() {
           operation = command.parameters[1];
 
           if (operation == 0) {
+            // Giving an item to the player; operation = 1 is removing
             // Inc
             console.log(
               `Sending Check ${$dataItems[id].name}. | ${APMod.BaseId.Item + id}`,
             );
             APMod.client.check(APMod.BaseId.Item + id);
+            command.code = 0;
           }
 
-          command.code = 0;
           break;
 
         case 127: // Weapons
@@ -721,6 +722,7 @@ function doFunctionHooks() {
       "1000waystodie": 65,
       hhm5times: 68,
       epilogue: 69,
+      ngplus: 70,
     };
 
     APMod.client.check(
@@ -983,8 +985,9 @@ APMod.Chat.setupWindow = function () {
 
   // Chat Input
   this.chatInput.addEventListener("keydown", function (event) {
+    event.stopPropagation(); // Prevent chat input from propogating to engine
     // Check if the pressed key is the "Enter" key
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && chatInput.value != "") {
       APMod.client.messages.say(APMod.Chat.chatInput.value);
       APMod.Chat.chatInput.value = "";
     } else if (event.key === "Backspace") {
@@ -993,6 +996,9 @@ APMod.Chat.setupWindow = function () {
         0,
         APMod.Chat.chatInput.value.length - 1,
       );
+    } else if (event.key === "Escape") {
+      APMod.Chat.chatHidden = true;
+      chatWindow.classList.toggle("hide");
     }
   });
 
@@ -1253,6 +1259,7 @@ APMod.Items.resetInventory = function () {
   this.received.forEach(function (item) {
     APMod.Items.add(item);
   });
+  console.log("RESETTING INVENTORY");
 };
 
 // Base
