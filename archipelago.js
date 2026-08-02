@@ -19,6 +19,7 @@ APMod.BaseId.Weapon = 1677310 + 240 + 100;
 APMod.BaseId.Armor = 1677310 + 240 + 100 + 60;
 APMod.BaseId.Misc = 1677310 + 240 + 100 + 60 + 100;
 
+
 export const config = {
   name: "Archipelago",
   author: "Lanausse, SharkCheeses",
@@ -990,12 +991,6 @@ APMod.Chat.setupWindow = function () {
     if (event.key === "Enter" && chatInput.value != "") {
       APMod.client.messages.say(APMod.Chat.chatInput.value);
       APMod.Chat.chatInput.value = "";
-    } else if (event.key === "Backspace") {
-      // Jank
-      APMod.Chat.chatInput.value = APMod.Chat.chatInput.value.substring(
-        0,
-        APMod.Chat.chatInput.value.length - 1,
-      );
     } else if (event.key === "Escape") {
       APMod.Chat.chatHidden = true;
       chatWindow.classList.toggle("hide");
