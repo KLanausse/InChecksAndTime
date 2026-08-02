@@ -31,7 +31,7 @@ export const config = {
       type: "button",
       onOk: async () => {
         APMod.server = await prompt("AP Server", APMod.server);
-        await sleep(1000);
+        await sleep(50000);
         console.debug(APMod.server);
       },
     },
@@ -41,7 +41,7 @@ export const config = {
       type: "button",
       onOk: async () => {
         APMod.slot = await prompt("Name", APMod.slot);
-        await sleep(1000);
+        await sleep(50000);
       },
     },
     password: {
@@ -50,7 +50,7 @@ export const config = {
       type: "button",
       onOk: async () => {
         APMod.password = await prompt("Password", APMod.password);
-        await sleep(1000);
+        await sleep(50000);
       },
     },
     connect: {
