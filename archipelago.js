@@ -860,8 +860,7 @@ APMod.Utils.getDeathReason = function () {
   if ($gameSwitches._data[112]) return ("firstTrap", $gameVariables._data[24]);
   if ($gameSwitches._data[113]) return ("pineapple", $gameVariables._data[109]);
   if ($gameSwitches._data[114]) return ("suicide", $gameVariables._data[110]);
-  if ($gameSwitches._data[119])
-    return ("friendReset", $gameVariables._data[111]);
+  if ($gameSwitches._data[119]) return ("friendReset", $gameVariables._data[111]);
 
   return ("unknown", 0);
 };
