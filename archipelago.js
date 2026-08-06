@@ -22,7 +22,7 @@ APMod.BaseId.Misc = 1677310 + 240 + 100 + 60 + 100;
 
 export const config = {
   name: "Archipelago",
-  author: "Lanausse, SharkCheeses",
+  author: "Lanausse, SharkCheeses, misch13vous",
   description: "Archipelago Multiworld Randomizer",
   version: "0.0.9",
   settings: {
