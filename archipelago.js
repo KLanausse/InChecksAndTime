@@ -702,6 +702,20 @@ function doFunctionHooks() {
   doDataManagerHook();
   doMusicRando();
 
+  //TEMP Fix
+  Game_System.prototype.schoiceTakeOut = function(index, noSearchJPN) {
+    if (index > -1) {
+      let tmpObj = this._msSelectedChoices.splice(index, 1);
+      if (!tmpObj) return;
+      if (noSearchJPN) return;
+      //search for JPN version to remove
+      let jpnTxt = this.schoiceGetJpnVersion(tmpObj['text']);
+      if (jpnTxt) {
+        this.removeSelectedChoice(jpnTxt['Japanese'], tmpObj['mapId'], tmpObj['evId'], tmpObj['pageId'], tmpObj['listId'], true);
+      }
+    }
+  };
+
   // Enemy Rando
   Game_Enemy.prototype._setup = Game_Enemy.prototype.setup;
   Game_Enemy.prototype.setup = function (enemyId, x, y) {
