@@ -499,8 +499,8 @@ function doCommonEventHook(command) {
       APMod.client.check(APMod.BaseId.Misc + 17);
       break;
 
-    case 26: //*FastForwardDisable
-      command.code = 0;
+    //case 26: //*FastForwardDisable
+    //  command.code = 0;
 
     default:
       break;
